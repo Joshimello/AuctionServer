@@ -1,0 +1,103 @@
+<!-- made with ❤ by Joshimello -->
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+    
+    <link rel="stylesheet" href="https://chibimello.com/css/flatly.bootstrap.min.css">
+    <link rel="stylesheet" href="https://chibimello.com/css/fontawesome.css">
+
+    <script src="https://chibimello.com/js/bootstrap.bundle.js"></script>
+    <script src="https://chibimello.com/js/jquery.min.js"></script>
+
+    <title>live</title>
+    <style type="text/css">
+        #bidhistory::-webkit-scrollbar{display: none;}
+    </style>
+</head>
+<body>
+    <div class="d-flex flex-column align-items-center justify-content-center vh-100">
+        <span class="display-1 d-block">
+            $<span id="price"></span>
+            <span class="h2"><span id="timeleft"></span>s</span>
+        </span>
+        <span class="h4 d-block">#<span id="bidnum"></span></span>
+    </div>
+
+    <div id="bidhistory" class="position-absolute fixed-top m-5 vh-100 overflow-auto" style="max-height: 80vh; overflow: scroll; -ms-overflow-style: none; scrollbar-width: none;">
+        
+    </div>
+
+    <div class="fixed-bottom row ">
+        <button class="btn btn-primary col-4" id="reset" onclick="resetprice()"><i class="fas fa-redo-alt"></i>
+        <button class="btn btn-primary col-4" id="pause" onclick="pauseclick()"><i class="fas fa-play"></i></button>
+        <button class="btn btn-primary col-4" id="nextitem" onclick="nextitem()"><i class="fas fa-forward"></i></button>
+    </div>
+    
+
+    <script src="socket.io/socket.io.js"></script>
+    <script>
+        const socket = io.connect('neko.chibimello.com', {path: "/socket1"});
+
+        var timeleft = 99
+        var pause = true
+        var lastbid = ""
+        var lastprice = 0
+
+        setInterval(function(){
+            $('#timeleft').text((round(timeleft) * 0.1).toFixed(1))
+            if(pause == false){
+                if(timeleft == 0){
+                    $('#bidhistory').append('(&check;) '+lastbid+': $'+lastprice+'<br>')
+                    pauseclick()
+                } else {
+                    timeleft = timeleft - 1
+                }
+            }
+        }, 100)
+
+        function round(value, precision) {
+            var multiplier = Math.pow(10, precision || 0);
+            return Math.round(value * multiplier) / multiplier;
+        }
+
+        function pauseclick(){
+            pause = pause ? false : true;
+            $('#pause i').toggleClass('fa-pause fa-play')
+            $('#nextitem').toggleClass('disabled')
+            $('#reset').toggleClass('disabled')
+        }
+
+        socket.on('updatebid', value => {
+            $('#price').text(value)
+            timeleft = 99
+        })
+
+        socket.on('updatebidnum', value => {
+            $('#bidnum').text(value)
+        })
+
+        socket.on('addbid', value => {
+            lastbid = value.name
+            lastprice = value.amount
+            $('#bidhistory').append('(#'+value.bidnum+') '+value.name+': $'+value.amount+'<br>')
+            $("#bidhistory").animate({ scrollTop: $('#bidhistory').prop("scrollHeight")}, 500);
+        })
+
+        function resetprice(){
+            socket.emit('reset', 0)
+            $('#bidhistory').append('-----------------------<br>')
+            $("#bidhistory").animate({ scrollTop: $('#bidhistory').prop("scrollHeight")}, 500);
+            timeleft = 99
+        }
+
+        function nextitem(){
+            socket.emit('nextitem', {'lastbid': lastbid, 'lastprice': lastprice})
+            $('#bidhistory').append('-----------------------<br>')
+            $("#bidhistory").animate({ scrollTop: $('#bidhistory').prop("scrollHeight")}, 500);
+            timeleft = 99
+        }
+        
+    </script>
+</body>
