@@ -5,11 +5,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
     
-    <link rel="stylesheet" href="https://chibimello.com/css/flatly.bootstrap.min.css">
-    <link rel="stylesheet" href="https://chibimello.com/css/fontawesome.css">
+    <link rel="stylesheet" href="https://unpkg.com/bootstrap@4.1.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css">
 
-    <script src="https://chibimello.com/js/bootstrap.bundle.js"></script>
-    <script src="https://chibimello.com/js/jquery.min.js"></script>
+    <script src="https://unpkg.com/jquery@3.3.1/dist/jquery.min.js"></script>
 
     <title>vote</title>
 
@@ -67,7 +66,7 @@
     </div>
     <script src="socket.io/socket.io.js"></script>
     <script>
-        const socket = io.connect('neko.chibimello.com', {path: "/socket1"});
+        const socket = io.connect()
 
         var bank = 1000
 
